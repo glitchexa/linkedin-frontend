@@ -117,28 +117,34 @@ SECURITY_VIOLATION: Unauthorized request detected
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", generationConfig: {"temperature": 0, "maxOutputTokens": 512, "topP": 1, "topK": 1, "responseMimeType": "text/plain"}, "systemInstruction": systemPrompt })
   const res = await model.generateContent(query);
 
-  if (!res) {
-    return NextResponse.json({ error: 'Failed to generate SQL query' }, { status: 500 })
-  }
+if (!res || !res.response || !res.response.text) {
+  return NextResponse.json({ error: 'Failed to generate SQL query' }, { status: 500 });
+}
 
-  const sqlQuery = (res.response.text()).trim();
-  if (!sqlQuery) {
-    return NextResponse.json({ error: 'Failed to generate SQL query' }, { status: 500 })
-  }
+const sqlQuery = res.response.text().trim();
 
-  try {
-    console.log(sqlQuery)
-    const checkQuery = sqlQuery.toLocaleLowerCase()
-    if (checkQuery.includes("security_violation") || checkQuery.includes("delete") || checkQuery.includes("alter") || checkQuery.includes("update") || checkQuery.includes("insert")) {
-        return NextResponse.json({ error: "Malicious SQL query execution attempted." }, { status: 500 })
-    }
-    const result = await pool.query(sqlQuery)
-    return NextResponse.json({ result: result.rows, sqlQuery, rowCount: result.rowCount })
-  } catch (error) {
-    console.error("Database query execution error:", error)
-  return NextResponse.json(
-    { error: 'Failed to execute SQL query', details: (error as Error).message },
-    { status: 500 }
-  )
+if (!sqlQuery) {
+  return NextResponse.json({ error: 'Generated SQL query is empty' }, { status: 500 });
+}
+
+// Check for malicious queries
+const checkQuery = sqlQuery.toLowerCase();
+if (checkQuery.includes("security_violation") || checkQuery.includes("delete") || checkQuery.includes("alter") || checkQuery.includes("update") || checkQuery.includes("insert")) {
+  return NextResponse.json({ error: "Malicious SQL query execution attempted." }, { status: 400 });
+}
+
+try {
+  const result = await pool.query(sqlQuery);
+  return NextResponse.json({
+    result: result.rows,
+    sqlQuery,
+    rowCount: result.rowCount,
+  });
+} catch (error) {
+  console.error("Database query execution error:", error);
+  return NextResponse.json({
+    error: 'Failed to execute SQL query',
+    details: error instanceof Error ? error.message : 'Unknown error',
+  }, { status: 500 });
 }
 }

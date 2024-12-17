@@ -11,9 +11,9 @@ export default function LookerReportPage() {
     <div className="container mx-auto p-8">
       <Card>
         <CardHeader>
-          <CardTitle>Looker Studio Report</CardTitle>
+          <CardTitle>Alumni Analytics</CardTitle>
           <CardDescription>
-            Explore your analytics data with this interactive Looker Studio report.
+            Visual Representation of Alumni Data.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center items-center">
