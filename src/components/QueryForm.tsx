@@ -1,16 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default function QueryForm({ onSubmit, loading }) {
-  const [query, setQuery] = useState('')
+// Define types for the props
+interface QueryFormProps {
+  onSubmit: (query: string) => void // Function that accepts a string and returns void
+  loading: boolean
+}
 
-  const handleSubmit = async (e) => {
+export default function QueryForm({ onSubmit, loading }: QueryFormProps) {
+  const [query, setQuery] = useState<string>('')
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    onSubmit(query)
+    onSubmit(query) // Call the onSubmit prop with the query string
   }
 
   return (

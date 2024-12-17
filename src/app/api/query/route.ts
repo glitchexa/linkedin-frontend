@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { db, pool } from '@/lib/db'
+import { pool } from '@/lib/db'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { error } from 'console'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
@@ -136,6 +135,10 @@ SECURITY_VIOLATION: Unauthorized request detected
     const result = await pool.query(sqlQuery)
     return NextResponse.json({ result: result.rows, sqlQuery, rowCount: result.rowCount })
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to execute SQL query' }, { status: 500 })
-  }
+    console.error("Database query execution error:", error)
+  return NextResponse.json(
+    { error: 'Failed to execute SQL query', details: (error as Error).message },
+    { status: 500 }
+  )
+}
 }

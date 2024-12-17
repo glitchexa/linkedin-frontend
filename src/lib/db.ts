@@ -8,9 +8,7 @@ import {
   timestamp, 
   date, 
   doublePrecision,
-  primaryKey,
-  uniqueIndex
-} from 'drizzle-orm/pg-core'
+  primaryKey} from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   urnId: varchar('urn_id', { length: 50 }).primaryKey(),
